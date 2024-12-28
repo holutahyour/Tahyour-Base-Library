@@ -2,6 +2,10 @@
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.ChangeTracking;
+global using Microsoft.Extensions.DependencyInjection;
+global using MongoDB.Bson.Serialization;
+global using MongoDB.Bson.Serialization.Serializers;
+global using MongoDB.Driver;
 global using System;
 global using System.Collections;
 global using System.Collections.Generic;
@@ -13,5 +17,7 @@ global using Tahyour.Base.Common.Domain.Common;
 global using Tahyour.Base.Common.Domain.Entities;
 global using Tahyour.Base.Common.Domain.Utilities;
 global using Tahyour.Base.Common.Repositories;
+global using Tahyour.Base.Common.Repositories.Implementations;
 global using Tahyour.Base.Common.Repositories.Interfaces;
 global using Tahyour.Base.Common.Services.Interface;
+

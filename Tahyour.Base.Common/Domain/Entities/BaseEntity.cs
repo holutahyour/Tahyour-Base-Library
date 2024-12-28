@@ -3,7 +3,7 @@
 public class BaseEntity<T> : AuditableEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required T Id { get; set; }
+    public T Id { get; set; }
 
-    public required string Code { get; set; }
+    public string Code { get; set; }
 }

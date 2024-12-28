@@ -1,11 +1,11 @@
 ﻿namespace Tahyour.Base.Common.Repositories.Interfaces;
 
-public interface IBaseRepository<T, I> where T : class
+public interface IMSSQLRepository<T, I> where T : class
 {
     Task<T[]> AddEntitiesAsync(T[] entities);
     Task<T> CreateAsync(T entity);
     Task<bool> DeleteAsync(I id);
-    Task<IList<T>> DeleteAsync(Expression<Func<T, bool>> expression);
+    Task<IList<string>> DeleteAsync(Expression<Func<T, bool>> expression);
     Task<IList<T>> GetAllAsync();
     Task<IList<T>> GetAllAsync(Expression<Func<T, bool>> expression);
     Task<T> GetByCodeAsync(string code);

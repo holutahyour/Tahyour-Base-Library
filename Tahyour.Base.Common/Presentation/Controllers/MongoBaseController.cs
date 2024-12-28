@@ -2,11 +2,11 @@
 
 [Route("api/[controller]")]
 [ApiController]
-public class BaseController<TEntity, TResponse, TId> : ControllerBase
+public class MongoBaseController<T, TResponse> : ControllerBase
 {
-    private readonly IBaseService<TEntity, TId> _service;
+    private readonly IMongoBaseService<T> _service;
 
-    public BaseController(IBaseService<TEntity, TId> service)
+    public MongoBaseController(IMongoBaseService<T> service)
     {
         _service = service;
     }
@@ -31,7 +31,7 @@ public class BaseController<TEntity, TResponse, TId> : ControllerBase
 
     [HttpGet]
     [Route("{id}")]
-    public virtual async Task<ActionResult> GetByIdAsync(TId id)
+    public virtual async Task<ActionResult> GetByIdAsync(Guid id)
     {
         var result = new Result<TResponse>();
         result.RequestTime = DateTime.UtcNow;
@@ -55,7 +55,7 @@ public class BaseController<TEntity, TResponse, TId> : ControllerBase
         return result;
     }
 
-    protected async Task<Result<bool>> UpdateAsync<TRequest>(TId id, [FromBody] TRequest request)
+    protected async Task<Result<bool>> UpdateAsync<TRequest>(Guid id, [FromBody] TRequest request)
     {
         var result = new Result<bool>();
         result.RequestTime = DateTime.UtcNow;
@@ -67,8 +67,7 @@ public class BaseController<TEntity, TResponse, TId> : ControllerBase
         return result;
     }
 
-
-    protected async Task<Result<bool>> RemoveAsync(TId id)
+    protected async Task<Result<bool>> RemoveAsync(Guid id)
     {
         var result = new Result<bool>();
         result.RequestTime = DateTime.UtcNow;

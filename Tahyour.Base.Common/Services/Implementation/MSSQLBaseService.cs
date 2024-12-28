@@ -1,14 +1,14 @@
 ﻿namespace Tahyour.Base.Common.Services.Implementation;
 
-public abstract class BaseService<TEntity, TId> : IBaseService<TEntity, TId>
+public abstract class MSSQLBaseService<TEntity, TId> : IMSSQLBaseService<TEntity, TId>
      where TEntity : BaseEntity<TId>
 {
-    private readonly IBaseRepository<TEntity, TId> _baseRepository;
+    private readonly IMSSQLRepository<TEntity, TId> _baseRepository;
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    protected BaseService(
-        IBaseRepository<TEntity, TId> baseRepository,
+    protected MSSQLBaseService(
+        IMSSQLRepository<TEntity, TId> baseRepository,
         IApplicationDbContext context,
         IMapper mapper
     )

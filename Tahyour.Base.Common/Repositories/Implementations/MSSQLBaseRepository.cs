@@ -1,11 +1,11 @@
 ﻿namespace Tahyour.Base.Common.Repositories.Implementations;
 
-public abstract class BaseRepository<T, I> : IBaseRepository<T, I>
+public abstract class MSSQLBaseRepository<T, I> : IMSSQLRepository<T, I>
     where T : BaseEntity<I>
 {
     private readonly IApplicationDbContext _context;
 
-    protected BaseRepository(IApplicationDbContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+    protected MSSQLBaseRepository(IApplicationDbContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
     #region CRUD Operations
 
@@ -180,11 +180,17 @@ public abstract class BaseRepository<T, I> : IBaseRepository<T, I>
         return true;
     }
 
-    public virtual async Task<IList<T>> DeleteAsync(Expression<Func<T, bool>> expression)
+    public virtual async Task<IList<string>> DeleteAsync(Expression<Func<T, bool>> expression)
     {
         ArgumentValidatorHelpers.ValidateArgument(expression, nameof(expression));
 
-        return await DeleteEntitiesAsync(expression);
+        var entities = await GetAllAsync(expression);
+
+        var ids = entities.Select(e => e.Id?.ToString()).ToList();
+
+        await DeleteEntitiesAsync(expression);
+
+        return ids;
     }
 
     #endregion

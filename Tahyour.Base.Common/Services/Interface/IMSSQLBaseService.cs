@@ -1,6 +1,6 @@
 ﻿namespace Tahyour.Base.Common.Services.Interface;
 
-public interface IBaseService<TEntity, TId>
+public interface IMSSQLBaseService<TEntity, TId>
 {
     Task<Result<TResponse>> CreateAsync<TResponse, TRequest>(TRequest request);
     Task<Result<IList<TResponse>>> GetAllAsync<TResponse>();
