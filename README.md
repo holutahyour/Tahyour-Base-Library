@@ -1,152 +1,220 @@
-# README: How to Inherit and Override Repository, Service, and Presentation Layers
+# Guide to Inheriting and Overriding Repository, Service, and Presentation Layers
 
-This guide explains how to extend the provided `MongoRepository`, `MongoBaseService`, and `MongoBaseController` classes to create specific implementations for your application.
-
----
-
-## 1. **Repository Layer**
-The repository layer is responsible for interacting with the database. To create a custom repository for a specific entity, you can inherit from the `MongoRepository<T>` class.
-
-### Steps to Inherit and Override the Repository
-
-1. **Create a Custom Repository Class**
-   ```csharp
-   public class ItemRepository : MongoRepository<Item>
-   {
-       public ItemRepository(IHttpContextAccessor httpContextAccessor, IMongoDatabase database)
-           : base(httpContextAccessor, database, "Items")
-       {
-       }
-
-       // Add custom methods if needed
-       public async Task<IList<Item>> GetItemsByNameAsync(string name)
-       {
-           var filter = Builders<Item>.Filter.Eq(i => i.Name, name);
-           return await mongoCollection.Find(filter).ToListAsync();
-       }
-   }
-   ```
-
-2. **Override Methods (Optional)**
-   If you need to customize existing methods like `CreateAsync` or `DeleteAsync`, override them in your custom class.
-   ```csharp
-   public override async Task<Item> CreateAsync(Item entity)
-   {
-       entity.Name = entity.Name.ToUpper();
-       return await base.CreateAsync(entity);
-   }
-   ```
+This document explains how to extend and customize the provided `MongoRepository`, `MongoBaseService`, and `MongoBaseController` classes in the `Tahyour.Base.Common` namespace. By inheriting and overriding these base classes, you can implement custom logic specific to your application.
 
 ---
 
-## 2. **Service Layer**
-The service layer handles business logic and communicates between the repository and the presentation layers. To create a custom service for an entity, inherit from `MongoBaseService<T>`.
+## Table of Contents
 
-### Steps to Inherit and Override the Service
-
-1. **Create a Custom Service Class**
-   ```csharp
-   public class ItemService : MongoBaseService<Item>
-   {
-       public ItemService(
-           IMongoRepository<Item> baseRepository,
-           IMongoRepository<AuditLog> auditLogRepository,
-           IMapper mapper,
-           IHttpContextAccessor httpContextAccessor)
-           : base(baseRepository, auditLogRepository, mapper, httpContextAccessor)
-       {
-       }
-
-       // Add custom methods if needed
-       public async Task<Result<IList<ItemDTO>>> GetItemsByCustomFilterAsync(string filter)
-       {
-           // Custom business logic
-           var response = await _baseRepository.GetAllAsync(i => i.Name.Contains(filter));
-           return new Result<IList<ItemDTO>>(true, _mapper.Map<IList<ItemDTO>>(response), "Filtered items retrieved.");
-       }
-   }
-   ```
-
-2. **Override Methods (Optional)**
-   Customize methods like `CreateAsync` or `UpdateAsync` by overriding them.
-   ```csharp
-   public override async Task<Result<ItemDTO>> CreateAsync<ItemDTO, ItemRequest>(ItemRequest request)
-   {
-       var entity = _mapper.Map<Item>(request);
-       entity.Name = entity.Name.Trim();
-       var response = await base.CreateAsync<ItemDTO, ItemRequest>(request);
-       return response;
-   }
-   ```
+1. [Adding the MongoDB Extension](#adding-the-mongodb-extension)
+2. [Repository Layer](#repository-layer)
+   - [Creating a Custom Repository](#creating-a-custom-repository)
+   - [Overriding Methods](#overriding-methods)
+3. [Service Layer](#service-layer)
+   - [Creating a Custom Service](#creating-a-custom-service)
+   - [Overriding Methods](#overriding-methods-1)
+4. [Presentation Layer](#presentation-layer)
+   - [Creating a Custom Controller](#creating-a-custom-controller)
+   - [Overriding Methods](#overriding-methods-2)
+5. [Example Entity](#example-entity)
 
 ---
 
-## 3. **Presentation Layer**
-The presentation layer provides API endpoints. To create a custom controller for an entity, inherit from `MongoBaseController<T, TResponse>`.
+## Adding the MongoDB Extension
 
-### Steps to Inherit and Override the Controller
+The `MongoDB` functionality is provided as part of the `Tahyour.Base.Library` package. To add and configure it:
 
-1. **Create a Custom Controller Class**
-   ```csharp
-   [Route("api/[controller]")]
-   [ApiController]
-   public class ItemController : MongoBaseController<Item, ItemDTO>
-   {
-       public ItemController(IMongoBaseService<Item> service) : base(service)
-       {
-       }
+### Step 1: Install the Package
 
-       // Add custom endpoints if needed
-       [HttpGet("by-name/{name}")]
-       public async Task<ActionResult> GetItemsByName(string name)
-       {
-           var response = await _service.GetAllAsync<ItemDTO>(filter: $"Name={name}");
-           return Ok(response);
-       }
-   }
-   ```
+Run the following command to install the package:
 
-2. **Override Methods (Optional)**
-   Customize methods like `GetAllAsync` by overriding them.
-   ```csharp
-   [HttpGet]
-   public override async Task<ActionResult> GetAllAsync(string search = null, string filter = null, int page = 1, int pageSize = 10, string select = null)
-   {
-       var result = await _service.GetAllAsync<ItemDTO>(search, filter, page, pageSize, select);
-       return Ok(result);
-   }
-   ```
+```bash
+dotnet add package Tahyour.Base.Library
+```
+
+### Step 2: Configure MongoDB Settings
+
+Add the following sections to your `appsettings.json` file:
+
+```json
+{
+  "ServiceSettings": {
+    "ServiceName": "YourServiceName"
+  },
+  "MongoDbSettings": {
+    "Host": "localhost",
+    "Port": 27017
+  }
+}
+```
+
+### Step 3: Register the Services
+
+In your `Startup.cs` or `Program.cs` file, use the following code to register the MongoDB services:
+
+```csharp
+builder.Services.AddMongo();
+builder.Services.AddMongoService<Item>("ItemsCollection");
+```
+
+Replace `Item` and `"ItemsCollection"` with your entity type and MongoDB collection name.
+
+### Step 4: Extend Base Classes
+
+Follow the sections below to extend the repository, service, and controller for custom functionality.
 
 ---
 
-## 4. **Entity Example**
+## Repository Layer
 
-### Item Entity
+### Creating a Custom Repository
+
+To create a custom repository for your entity:
+
+1. Create a new class that inherits from `MongoRepository<T>`.
+2. Pass your entity type as the generic parameter `T`.
+3. Implement additional methods or override existing ones.
+
+```csharp
+public class CustomItemRepository : MongoRepository<Item>
+{
+    public CustomItemRepository(IHttpContextAccessor httpContextAccessor, IMongoDatabase database)
+        : base(httpContextAccessor, database, "CustomItems")
+    {
+    }
+
+    public async Task<IList<Item>> GetItemsByNameAsync(string name)
+    {
+        var filter = Builders<Item>.Filter.Eq(i => i.Name, name);
+        return await mongoCollection.Find(filter).ToListAsync();
+    }
+}
+```
+
+### Overriding Methods
+
+You can override methods in the base repository to modify their behavior:
+
+```csharp
+public override async Task<Item?> GetByIdAsync(Guid id)
+{
+    var item = await base.GetByIdAsync(id);
+    if (item == null)
+    {
+        throw new Exception("Item not found");
+    }
+    return item;
+}
+```
+
+---
+
+## Service Layer
+
+### Creating a Custom Service
+
+To create a custom service for your entity:
+
+1. Create a new class that inherits from `MongoBaseService<T>`.
+2. Pass your entity type as the generic parameter `T`.
+3. Implement additional methods or override existing ones.
+
+```csharp
+public class CustomItemService : MongoBaseService<Item>
+{
+    public CustomItemService(
+        IMongoRepository<Item> baseRepository,
+        IMongoRepository<AuditLog> auditLogRepository,
+        IMapper mapper,
+        IHttpContextAccessor httpContextAccessor
+    ) : base(baseRepository, auditLogRepository, mapper, httpContextAccessor)
+    {
+    }
+
+    public async Task<Result<IList<ItemDTO>>> GetItemsByNameAsync(string name)
+    {
+        var items = await _baseRepository.GetAllAsync(i => i.Name.Contains(name));
+        return new Result<IList<ItemDTO>>(true, _mapper.Map<IList<ItemDTO>>(items), "Items retrieved successfully");
+    }
+}
+```
+
+### Overriding Methods
+
+You can override methods in the base service to modify their behavior:
+
+```csharp
+public override async Task<Result<bool>> RemoveAsync(Guid id)
+{
+    var existingItem = await _baseRepository.GetByIdAsync(id);
+    if (existingItem == null)
+    {
+        return new Result<bool>(false, false, "Item not found");
+    }
+    return await base.RemoveAsync(id);
+}
+```
+
+---
+
+## Presentation Layer
+
+### Creating a Custom Controller
+
+To create a custom controller for your entity:
+
+1. Create a new class that inherits from `MongoBaseController<T, TResponse>`.
+2. Pass your entity type as `T` and the DTO type as `TResponse`.
+3. Implement additional endpoints or override existing ones.
+
+```csharp
+[Route("api/custom-items")]
+public class CustomItemController : MongoBaseController<Item, ItemDTO>
+{
+    public CustomItemController(IMongoBaseService<Item> service) : base(service)
+    {
+    }
+
+    [HttpGet("by-name/{name}")]
+    public async Task<ActionResult> GetItemsByNameAsync(string name)
+    {
+        var result = await _service.GetAllAsync<ItemDTO>(search: name);
+        return Ok(result);
+    }
+}
+```
+
+### Overriding Methods
+
+You can override methods in the base controller to modify their behavior:
+
+```csharp
+public override async Task<ActionResult> GetByIdAsync(Guid id)
+{
+    var response = await base.GetByIdAsync(id);
+    if (response == null)
+    {
+        return NotFound("Custom item not found.");
+    }
+    return Ok(response);
+}
+```
+
+---
+
+## Example Entity
+
+Here is an example entity and DTO used in the examples above:
+
 ```csharp
 public class Item : BaseEntity<Guid>
 {
     public string Name { get; set; }
 }
-```
 
-### Item DTO
-```csharp
 public class ItemDTO
 {
     public string Name { get; set; }
 }
 ```
-
-### Item Request Model
-```csharp
-public class ItemRequest
-{
-    public string Name { get; set; }
-}
-```
-
----
-
-## Summary
-By inheriting and overriding the provided `MongoRepository`, `MongoBaseService`, and `MongoBaseController` classes, you can quickly create a robust and scalable application architecture. Follow the examples above to implement specific logic for your entities.
 
