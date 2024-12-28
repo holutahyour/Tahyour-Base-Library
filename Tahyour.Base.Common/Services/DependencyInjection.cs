@@ -1,14 +1,12 @@
-﻿namespace Tahyour.Base.Common.Services
-{
-    public static class DependencyInjection
-    {
-        public static IServiceCollection AddServices(this IServiceCollection services)
-        {
-            services.AddMongo()
-                .AddMongoService<AuditLog>("AuditLog")
-                .AddMongoService<Item>("Items");
+﻿namespace Tahyour.Base.Common.Services;
 
-            return services;
-        }
+public static class DependencyInjection
+{
+    public static IServiceCollection AddBaseServices(this IServiceCollection services)
+    {
+        services.AddMongo()
+            .AddMongoService<AuditLog>("AuditLog");
+
+        return services;
     }
 }

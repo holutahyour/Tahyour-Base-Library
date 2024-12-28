@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Text.Json;
-
-namespace Tahyour.Base.Common.Services.Implementation;
+﻿namespace Tahyour.Base.Common.Services.Implementation;
 
 public class MongoBaseService<T> : IMongoBaseService<T>
      where T : BaseEntity<Guid>

@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Tahyour.Base.Common.Services.Implementation;
-
-namespace Tahyour.Base.Common.Services;
+﻿namespace Tahyour.Base.Common.Services;
 
 public static class Extensions
 {
@@ -35,7 +31,7 @@ public static class Extensions
     {
         var mapperConfig = new MapperConfiguration(mc =>
         {
-            mc.AddProfile(new AutoMapperConfig());
+            mc.AddProfile(new MapperConfig());
         });
 
         IMapper mapper = mapperConfig.CreateMapper();

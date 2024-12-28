@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace Tahyour.Base.Common.Repositories.Implementations;
+﻿namespace Tahyour.Base.Common.Repositories.Implementations;
 
 public class MongoRepository<T> : IMongoRepository<T> where T : BaseEntity<Guid>
 {

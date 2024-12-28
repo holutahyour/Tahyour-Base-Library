@@ -1,8 +1,9 @@
 ﻿namespace Tahyour.Base.Common.Services
 {
-    public class AutoMapperConfig : Profile
+    public class MapperConfig : Profile
     {
-        public AutoMapperConfig()
+        private List<Type> mappings;
+        public MapperConfig()
         {
             ConfigureStandardMappings();
             ConfigureCustomMappings();
@@ -10,11 +11,6 @@
 
         private void ConfigureStandardMappings()
         {
-            // Standard mappings without custom member configurations
-            var mappings = new[]
-            {
-                typeof(Item)
-            };
 
             foreach (var type in mappings)
             {
@@ -22,6 +18,11 @@
                 //CreateMap(type, GetCreateDtoType(type)).ReverseMap();
                 //CreateMap(type, GetUpdateDtoType(type)).ReverseMap();
             }
+        }
+
+        public virtual void AddMappingType(Type type)
+        {
+            mappings.Add(type);
         }
 
         private void ConfigureCustomMappings()
